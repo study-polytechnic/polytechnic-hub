@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Polytechnic Hub</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons for UI elements -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* Custom Styles for better mobile experience */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Remove blue highlight on touch */
+            background-color: #f3f4f6;
+            overflow: hidden; /* Prevent body scroll, handle scrolling in main content */
+        }
+        
+        /* Hide scrollbar for cleaner look on mobile */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* Screen Transitions */
+        .screen {
+            display: none;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #f3f4f6;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Drawer Transition */
+        #drawer {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%);
+        }
+        #drawer.open { transform: translateX(0); }
+        
+        #drawerOverlay {
+            transition: opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #drawerOverlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Header spacing */
+        .content-with-header { padding-top: 60px; height: 100vh; }
+        
+        /* Loading Image Fallback */
+        img { text-indent: -10000px; }
+        img:after { content: attr(alt); display: block; text-indent: 0; font-size: 12px; color: #666; text-align: center; padding: 10px; }
+    </style>
+</head>
+<body class="relative h-screen w-screen overflow-hidden bg-gray-50 text-gray-800">
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="splashScreen" class="screen active bg-blue-600 flex flex-col items-center justify-center text-white z-50">
+        <div class="w-32 h-32 bg-white rounded-2xl p-2 shadow-2xl mb-8 animate-bounce">
+            <img src="file_00000000bc747207aec7c53bb87ed146.png" alt="Logo" class="w-full h-full object-contain rounded-xl" onerror="this.onerror=null; this.src='https://placehold.co/150x150/ffffff/2563eb?text=Logo';">
+        </div>
+        <h1 class="text-4xl font-extrabold mb-2 tracking-wide text-center">Polytechnic Hub</h1>
+        <p class="text-blue-200 text-lg mb-12 text-center">Your Ultimate Diploma Companion</p>
+        
+        <div class="w-full max-w-sm rounded-xl overflow-hidden shadow-2xl bg-black relative mx-4">
+            <!-- Simulated Intro Video -->
+            <video src="gemini_generated_video_02b56911.mp4" autoplay muted loop playsinline class="w-full h-48 object-cover opacity-80"></video>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <p class="text-white text-sm font-semibold bg-black bg-opacity-50 px-3 py-1 rounded-full">Loading Hub...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER (Visible after splash) -->
+    <div id="mainApp" class="hidden h-full w-full">
+
+        <!-- HEADER -->
+        <header class="absolute top-0 w-full h-[60px] bg-blue-600 text-white shadow-md z-40 flex items-center justify-between px-4">
+            <div class="flex items-center">
+                <!-- Menu Button (Visible on Home) -->
+                <button id="menuBtn" onclick="toggleDrawer()" class="p-2 -ml-2 rounded-full hover:bg-blue-700 transition-colors">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <!-- Back Button (Visible on inner screens) -->
+                <button id="backBtn" onclick="goBack()" class="hidden p-2 -ml-2 rounded-full hover:bg-blue-700 transition-colors">
+                    <i class="ph ph-caret-left text-2xl"></i>
+                </button>
+                
+                <h1 id="headerTitle" class="text-lg font-bold ml-2 flex items-center gap-2">
+                    <img id="headerLogo" src="file_00000000bc747207aec7c53bb87ed146.png" class="w-6 h-6 rounded-full bg-white object-cover" onerror="this.style.display='none'">
+                    Polytechnic Hub
+                </h1>
+            </div>
+        </header>
+
+        <!-- DRAWER (Side Menu) -->
+        <div id="drawerOverlay" class="fixed inset-0 bg-black/50 z-50" onclick="toggleDrawer()"></div>
+        <div id="drawer" class="fixed top-0 left-0 bottom-0 w-64 bg-white shadow-xl z-50 flex flex-col">
+            <div class="bg-blue-600 p-6 flex flex-col items-center text-white">
+                <div class="w-20 h-20 bg-white rounded-full p-1 overflow-hidden mb-3 shadow-md">
+                    <img src="file_00000000bc747207aec7c53bb87ed146.png" alt="Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://placehold.co/100/ffffff/2563eb?text=Logo'">
+                </div>
+                <h2 class="text-xl font-bold">Polytechnic Hub</h2>
+            </div>
+            <div class="flex-1 p-2 space-y-1">
+                <button onclick="navigateTo('homeScreen', 'Polytechnic Hub'); toggleDrawer();" class="w-full flex items-center p-3 rounded-lg hover:bg-blue-50 text-gray-700 font-medium">
+                    <i class="ph ph-house text-xl mr-3 text-blue-600"></i> Home
+                </button>
+                <button onclick="navigateTo('aboutScreen', 'About Developer'); toggleDrawer();" class="w-full flex items-center p-3 rounded-lg hover:bg-blue-50 text-gray-700 font-medium">
+                    <i class="ph ph-info text-xl mr-3 text-blue-600"></i> About Developer
+                </button>
+            </div>
+            <div class="p-4 border-t text-center text-xs text-gray-400">Version 1.0</div>
+        </div>
+
+        <!-- 2. HOME SCREEN -->
+        <div id="homeScreen" class="screen content-with-header bg-white">
+            <!-- Banner -->
+            <div class="w-full h-40 bg-gray-200 relative overflow-hidden">
+                <img src="1781781254073.png" alt="Banner" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x200/2563eb/ffffff?text=Welcome+to+Polytechnic+Hub'">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                    <h2 class="text-white text-lg font-bold">Select Semester</h2>
+                </div>
+            </div>
+            
+            <!-- Semesters Grid -->
+            <div class="p-4 grid grid-cols-2 gap-4 max-w-lg mx-auto pb-8">
+                <!-- Generated via JS -->
+            </div>
+        </div>
+
+        <!-- 3. BRANCH SCREEN -->
+        <div id="branchScreen" class="screen content-with-header bg-gray-50">
+            <div class="p-4 max-w-lg mx-auto pb-8">
+                <div id="branchContext" class="mb-4 text-sm font-medium text-gray-500 bg-white p-3 rounded-lg shadow-sm border border-gray-100"></div>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 px-1">Choose Branch</h2>
+                <div id="branchList" class="flex flex-col gap-3">
+                    <!-- Generated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SUBJECT SCREEN -->
+        <div id="subjectScreen" class="screen content-with-header bg-gray-50">
+            <div class="p-4 max-w-lg mx-auto pb-8">
+                <div id="subjectContext" class="mb-4 text-xs font-medium text-gray-500 bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex items-center flex-wrap gap-1"></div>
+                <h2 class="text-xl font-bold mb-4 text-gray-800 px-1">Select Subject</h2>
+                <div id="subjectList" class="flex flex-col gap-3">
+                    <!-- Generated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. CONTENT SCREEN (Video/PDF) -->
+        <div id="contentScreen" class="screen bg-gray-50 flex flex-col h-full pt-[60px]">
+            <!-- Context Bar -->
+            <div id="contentContext" class="bg-gray-800 text-white p-2 px-4 text-xs shadow-inner flex items-center whitespace-nowrap overflow-x-auto no-scrollbar"></div>
+            
+            <!-- Tabs -->
+            <div class="flex bg-white shadow-sm shrink-0">
+                <button onclick="switchTab('video')" id="tabVideo" class="flex-1 py-3 flex items-center justify-center font-bold text-blue-600 border-b-4 border-blue-600 bg-blue-50 transition-colors">
+                    <i class="ph-fill ph-video-camera text-xl mr-2"></i> Videos
+                </button>
+                <button onclick="switchTab('pdf')" id="tabPdf" class="flex-1 py-3 flex items-center justify-center font-bold text-gray-500 hover:bg-gray-50 transition-colors">
+                    <i class="ph-fill ph-file-pdf text-xl mr-2"></i> PDFs
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div id="videoContainer" class="max-w-lg mx-auto space-y-4">
+                    <!-- Video items generated via JS -->
+                </div>
+                <div id="pdfContainer" class="hidden max-w-lg mx-auto space-y-4">
+                    <!-- PDF items generated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. ABOUT SCREEN -->
+        <div id="aboutScreen" class="screen content-with-header bg-white">
+            <div class="p-6 max-w-lg mx-auto text-center">
+                <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-blue-100 mb-4 shadow-lg bg-gray-100">
+                    <img src="IMG_20260614_132123.jpg" alt="Developer" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200/cccccc/ffffff?text=Developer'">
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Admin / Developer</h3>
+                <p class="text-blue-600 font-medium text-sm mb-4">Founder, Polytechnic Hub</p>
+                <p class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 mb-8 shadow-inner">
+                    Welcome to Polytechnic Hub! I created this platform to provide organized, high-quality video lectures and PDF notes for all diploma students.
+                </p>
+
+                <div class="text-left bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div class="bg-blue-600 p-3 text-white flex items-center justify-center gap-2">
+                        <i class="ph-fill ph-book-open text-xl"></i>
+                        <h3 class="font-bold">AI Resource Book</h3>
+                    </div>
+                    <div class="p-4">
+                        <img src="Screenshot_2026-06-19-20-54-44-00_b5a5c5cb02ca09c784c5d88160e2ec24.jpg" alt="Developer Book AI" class="w-full rounded-lg shadow-sm border border-gray-200" onerror="this.src='https://placehold.co/400x600/f3f4f6/a1a1aa?text=AI+Book+Screenshot'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- Data ---
+        const semesters = [1, 2, 3, 4, 5, 6];
+        const branches = ["Computer Science", "Electrical Eng.", "Mechanical Eng.", "Civil Eng.", "Electronics"];
+        const subjectsData = {
+            1: ["Applied Math I", "Applied Physics I", "Eng. Drawing", "Fundamentals of IT"],
+            2: ["Applied Math II", "Applied Physics II", "Applied Chemistry", "Programming in C"],
+            default: ["Core Subject 1", "Core Subject 2", "Elective Subject", "Practical Lab"]
+        };
+
+        // --- State ---
+        let state = {
+            currentScreen: 'homeScreen',
+            history: [],
+            selectedSem: null,
+            selectedBranch: null,
+            selectedSubject: null,
+            activeTab: 'video'
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Splash screen timer
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.remove('active');
+                document.getElementById('mainApp').classList.remove('hidden');
+                initHomeScreen();
+            }, 3000);
+        });
+
+        // --- Navigation Logic ---
+        function navigateTo(screenId, title, addToHistory = true) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Show target screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update Header
+            document.getElementById('headerTitle').innerHTML = screenId === 'homeScreen' ? 
+                `<img src="file_00000000bc747207aec7c53bb87ed146.png" class="w-6 h-6 rounded-full bg-white object-cover" onerror="this.style.display='none'"> ${title}` : 
+                title;
+            
+            // Toggle Menu/Back buttons
+            const menuBtn = document.getElementById('menuBtn');
+            const backBtn = document.getElementById('backBtn');
+            
+            if (screenId === 'homeScreen') {
+                menuBtn.classList.remove('hidden');
+                backBtn.classList.add('hidden');
+                state.history = []; // clear history on home
+            } else {
+                menuBtn.classList.add('hidden');
+                backBtn.classList.remove('hidden');
+                if (addToHistory) {
+                    state.history.push(state.currentScreen);
+                }
+            }
+            
+            state.currentScreen = screenId;
+        }
+
+        function goBack() {
+            if (state.history.length > 0) {
+                const prevScreen = state.history.pop();
+                
+                // Determine title based on previous screen
+                let title = "Polytechnic Hub";
+                if (prevScreen === 'branchScreen') title = "Choose Branch";
+                else if (prevScreen === 'subjectScreen') title = "Subjects";
+                else if (prevScreen === 'aboutScreen') title = "About Developer";
+
+                navigateTo(prevScreen, title, false);
+            } else {
+                navigateTo('homeScreen', 'Polytechnic Hub', false);
+            }
+        }
+
+        // --- Drawer Logic ---
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        // --- Screen Renderers ---
+        function initHomeScreen() {
+            const container = document.querySelector('#homeScreen .grid');
+            container.innerHTML = '';
+            
+            semesters.forEach(sem => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white rounded-xl shadow-sm p-6 border-b-4 border-blue-600 hover:bg-blue-50 active:scale-95 transition-all flex flex-col items-center justify-center gap-3";
+                btn.innerHTML = `
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <i class="ph-fill ph-student text-2xl"></i>
+                    </div>
+                    <span class="font-bold text-gray-800 text-lg">Semester ${sem}</span>
+                `;
+                btn.onclick = () => {
+                    state.selectedSem = sem;
+                    initBranchScreen();
+                };
+                container.appendChild(btn);
+            });
+            navigateTo('homeScreen', 'Polytechnic Hub');
+        }
+
+        function initBranchScreen() {
+            document.getElementById('branchContext').innerHTML = `You selected: <span class="text-blue-600 font-bold">Semester ${state.selectedSem}</span>`;
+            
+            const container = document.getElementById('branchList');
+            container.innerHTML = '';
+            
+            branches.forEach(branch => {
+                const btn = document.createElement('button');
+                btn.className = "flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:border-blue-400 active:bg-gray-50 transition-all text-left";
+                btn.innerHTML = `
+                    <span class="font-bold text-gray-700">${branch}</span>
+                    <i class="ph-bold ph-caret-right text-gray-400"></i>
+                `;
+                btn.onclick = () => {
+                    state.selectedBranch = branch;
+                    initSubjectScreen();
+                };
+                container.appendChild(btn);
+            });
+            navigateTo('branchScreen', 'Choose Branch');
+        }
+
+        function initSubjectScreen() {
+            document.getElementById('subjectContext').innerHTML = `
+                Sem ${state.selectedSem} <i class="ph-bold ph-caret-right mx-1"></i> 
+                <span class="text-blue-600 font-bold">${state.selectedBranch}</span>
+            `;
+            
+            const container = document.getElementById('subjectList');
+            container.innerHTML = '';
+            
+            const subjects = subjectsData[state.selectedSem] || subjectsData.default;
+            
+            subjects.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = "flex items-center p-4 bg-white rounded-xl shadow-sm border-l-4 border-blue-500 hover:bg-gray-50 transition-all text-left";
+                btn.innerHTML = `
+                    <div class="bg-blue-100 p-3 rounded-lg mr-4">
+                        <i class="ph-fill ph-book-open text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 text-lg leading-tight mb-1">${sub}</h3>
+                        <p class="text-xs text-gray-500">Videos & PDF Notes Available</p>
+                    </div>
+                    <i class="ph-bold ph-caret-right text-gray-300"></i>
+                `;
+                btn.onclick = () => {
+                    state.selectedSubject = sub;
+                    initContentScreen();
+                };
+                container.appendChild(btn);
+            });
+            navigateTo('subjectScreen', 'Subjects');
+        }
+
+        function initContentScreen() {
+            // Update Context Bar
+            document.getElementById('contentContext').innerHTML = `
+                Sem ${state.selectedSem} <i class="ph-bold ph-caret-right mx-1 text-gray-500"></i> 
+                ${state.selectedBranch.split(' ')[0]} <i class="ph-bold ph-caret-right mx-1 text-gray-500"></i> 
+                <span class="font-bold text-blue-300 ml-1 truncate">${state.selectedSubject}</span>
+            `;
+
+            // Generate Mock Videos
+            const videoContainer = document.getElementById('videoContainer');
+            videoContainer.innerHTML = '';
+            for(let i=1; i<=4; i++) {
+                videoContainer.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                        <div class="w-full h-44 bg-gray-900 relative flex items-center justify-center group cursor-pointer">
+                            <!-- Placeholder image for video thumbnail -->
+                            <div class="absolute inset-0 bg-blue-900 opacity-50"></div>
+                            <img src="https://placehold.co/400x200/1e3a8a/ffffff?text=${state.selectedSubject.replace(/ /g, '+')}+Lec+${i}" class="w-full h-full object-cover opacity-80" alt="Thumbnail">
+                            <i class="ph-fill ph-play-circle absolute text-5xl text-white opacity-90 drop-shadow-lg"></i>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-800 mb-1 leading-tight">Lec ${i}: Complete Concept of ${state.selectedSubject}</h3>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-xs font-medium text-gray-500">By Admin</p>
+                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md">45:00</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Generate Mock PDFs
+            const pdfContainer = document.getElementById('pdfContainer');
+            pdfContainer.innerHTML = '';
+            for(let i=1; i<=5; i++) {
+                pdfContainer.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center cursor-pointer active:bg-gray-50">
+                        <div class="bg-red-50 border border-red-100 p-3 rounded-lg mr-4">
+                            <i class="ph-fill ph-file-pdf text-2xl text-red-500"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-gray-800 text-sm mb-1 truncate">Chapter ${i} - Handwritten Notes</h3>
+                            <p class="text-xs text-gray-500">PDF Document • 2.4 MB</p>
+                        </div>
+                        <button class="p-2 ml-2 bg-gray-100 rounded-full text-gray-600">
+                            <i class="ph-bold ph-download-simple text-lg"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Reset to video tab
+            switchTab('video');
+            navigateTo('contentScreen', 'Study Materials');
+        }
+
+        function switchTab(tab) {
+            state.activeTab = tab;
+            const tabVideo = document.getElementById('tabVideo');
+            const tabPdf = document.getElementById('tabPdf');
+            const videoContainer = document.getElementById('videoContainer');
+            const pdfContainer = document.getElementById('pdfContainer');
+
+            if (tab === 'video') {
+                // Style tabs
+                tabVideo.className = "flex-1 py-3 flex items-center justify-center font-bold text-blue-600 border-b-4 border-blue-600 bg-blue-50 transition-colors";
+                tabPdf.className = "flex-1 py-3 flex items-center justify-center font-bold text-gray-500 hover:bg-gray-50 transition-colors border-b-4 border-transparent";
+                // Show/Hide content
+                videoContainer.classList.remove('hidden');
+                pdfContainer.classList.add('hidden');
+            } else {
+                tabPdf.className = "flex-1 py-3 flex items-center justify-center font-bold text-red-600 border-b-4 border-red-600 bg-red-50 transition-colors";
+                tabVideo.className = "flex-1 py-3 flex items-center justify-center font-bold text-gray-500 hover:bg-gray-50 transition-colors border-b-4 border-transparent";
+                
+                pdfContainer.classList.remove('hidden');
+                videoContainer.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
